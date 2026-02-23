@@ -10,7 +10,7 @@ const rewardsData = [
     { "name": "Lucario Ex", "language": "Español", "cost": 30000, "image": "https://assets.pokemon-zone.com/game-assets/CardPreviews/cPK_20_005580_00_LUCARIOex_SR.webp", "quantity": 1 },
     { "name": "Alolan Muk Ex Arcoiris", "language": "Chino", "cost": 50000, "image": "https://assets.pokemon-zone.com/game-assets/CardPreviews/cPK_20_006920_01_ALOLABETBETONex_SAR.webp", "quantity": 1 },
     { "name": "Melmetal Ex Arcoiris", "language": "Chino", "cost": 50000, "image": "https://assets.pokemon-zone.com/game-assets/CardPreviews/cPK_20_012560_01_MELMETALex_SAR.webp", "quantity": 1 },
-    { "name": "Taurus EX Arcoiris", "language": "Inglés", "cost": 50000, "image": "https://assets.pokemon-zone.com/game-assets/CardPreviews/cTR_20_000980_00_MELISSA_SR.webp", "quantity": 1 }
+    { "name": "Taurus EX Arcoiris", "language": "Inglés", "cost": 50000, "image": "https://assets.pokemon-zone.com/game-assets/CardPreviews/cPK_20_012650_01_KENTAUROSex_SAR.webp", "quantity": 1 }
 ];
 
 function loadRewards() {
