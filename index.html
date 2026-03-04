@@ -13,9 +13,72 @@
 
 <body>
     <div class="container">
-        <main id="rewards-container" class="rewards-grid">
-            <!-- Dynamically loaded content will go here -->
-            <div class="loading">Cargando recompensas...</div>
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="rewards">
+                <i class="fas fa-gift"></i> Recompensas
+            </button>
+            <button class="tab-btn" data-tab="tournament">
+                <i class="fas fa-trophy"></i> Torneo
+            </button>
+        </nav>
+
+        <main id="rewards-section" class="tab-content active">
+            <div id="rewards-container" class="rewards-grid">
+                <!-- Dynamically loaded content will go here -->
+                <div class="loading">Cargando recompensas...</div>
+            </div>
+        </main>
+
+        <main id="tournament-section" class="tab-content">
+            <div class="tournament-config">
+                <h2>Configuración de Torneo</h2>
+                <div class="config-grid">
+                    <div class="input-group">
+                        <label for="player-count">Cantidad de Jugadores</label>
+                        <input type="number" id="player-count" min="2" max="128" value="8">
+                    </div>
+                    <div class="input-group">
+                        <label for="match-format">Formato de Partida</label>
+                        <select id="match-format">
+                            <option value="bo1">Al mejor de 1 (BO1)</option>
+                            <option value="bo3" selected>Al mejor de 3 (BO3)</option>
+                            <option value="bo5">Al mejor de 5 (BO5)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="tournament-type">Tipo de Torneo</label>
+                        <select id="tournament-type">
+                            <option value="auto">Automático (Basado en jugadores)</option>
+                            <option value="swiss">Suizo</option>
+                            <option value="brackets">Brackets (Eliminación)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="player-names-container" class="player-names-grid" style="display: none;">
+                    <h3>Nombres de Jugadores</h3>
+                    <div id="player-inputs" class="inputs-grid"></div>
+                </div>
+
+                <div class="config-actions">
+                    <button id="setup-players" class="btn-secondary">
+                        <i class="fas fa-users"></i> Configurar Jugadores
+                    </button>
+                    <button id="generate-tournament" class="btn-primary" style="display: none;">
+                        <i class="fas fa-play"></i> Iniciar Torneo
+                    </button>
+                    <button id="reset-tournament" class="btn-danger" style="display: none;">
+                        <i class="fas fa-trash"></i> Nuevo Torneo
+                    </button>
+                </div>
+            </div>
+
+            <div id="tournament-display" class="tournament-display">
+                <div class="empty-state">
+                    <i class="fas fa-info-circle"></i>
+                    <p>Configura y crea un torneo para ver el contenido.</p>
+                </div>
+            </div>
         </main>
     </div>
 
