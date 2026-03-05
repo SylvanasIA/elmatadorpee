@@ -376,6 +376,97 @@ header p {
     outline: none;
 }
 
+/* Score Inputs */
+.score-input {
+    width: 35px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    text-align: center;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    padding: 2px;
+}
+
+.score-input:focus {
+    outline: none;
+    border-color: var(--twitch-purple);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.match-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 0.6rem;
+    margin-bottom: 1rem;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: border-color 0.3s ease;
+}
+
+.match-item:hover {
+    border-color: var(--text-secondary);
+}
+
+.match-player {
+    font-size: 0.85rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.winner {
+    color: var(--twitch-light-purple);
+    font-weight: 700;
+}
+
+/* Champion Celebration */
+.champion-banner {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    text-align: center;
+    color: #000;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+    animation: celebrate 1s ease infinite alternate;
+    width: 100%;
+}
+
+.champion-banner h2 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+}
+
+.champion-banner .champion-name {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+}
+
+.champion-banner i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+@keyframes celebrate {
+    from {
+        transform: scale(1);
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+    }
+
+    to {
+        transform: scale(1.02);
+        box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);
+    }
+}
+
 /* Tournament Display */
 .tournament-display {
     min-height: 300px;

@@ -181,6 +181,36 @@ function renderTournament(data, container) {
         resolvedType = data.playerCount > 8 ? 'swiss' : 'brackets';
     }
 
+    // Detectar Campeón
+    let champion = null;
+    if (resolvedType === 'brackets' && data.brackets) {
+        const finalRound = data.brackets[data.brackets.length - 1];
+        if (finalRound && finalRound[0] && finalRound[0].winner && finalRound[0].winner !== 'TBD') {
+            champion = finalRound[0].winner;
+        }
+    } else if (resolvedType === 'swiss' && data.swissData) {
+        // En Suizo, el campeón es el que tiene más puntos al final (simplificando)
+        // Podríamos añadir una condición de "Torneo Finalizado"
+        const sorted = [...data.swissData].sort((a, b) => b.points - a.points);
+        if (sorted[0] && sorted[0].points > 0) {
+            // Mostramos el posible campeón si hay puntos
+            champion = sorted[0].name;
+            container.innerHTML += `<p style="text-align:center; color: var(--text-secondary); margin-bottom: 1rem;">Líder actual: ${champion}</p>`;
+        }
+    }
+
+    if (champion && (resolvedType === 'brackets' || (resolvedType === 'swiss' && data.isFinished))) {
+        const banner = document.createElement('div');
+        banner.className = 'champion-banner';
+        banner.innerHTML = `
+            <i class="fas fa-crown"></i>
+            <h2>¡CAMPEÓN!</h2>
+            <div class="champion-name">${champion}</div>
+            <p>Felicidades por la victoria en el torneo</p>
+        `;
+        container.appendChild(banner);
+    }
+
     const header = document.createElement('div');
     header.style.width = '100%';
     header.innerHTML = `
@@ -191,46 +221,93 @@ function renderTournament(data, container) {
     container.appendChild(header);
 
     if (resolvedType === 'swiss') {
-        renderSwissTable(data.players, container);
+        renderSwissTable(data, container);
     } else if (resolvedType === 'brackets') {
-        renderBrackets(data.players, container);
+        renderBrackets(data, container);
     }
 }
 
-function renderSwissTable(playerNames, container) {
-    const table = document.createElement('div');
-    table.style.width = '100%';
-    table.innerHTML = `
+function renderSwissTable(data, container) {
+    const tableContainer = document.createElement('div');
+    tableContainer.style.width = '100%';
+
+    // Si no hay datos de rondas/puntuación en el objeto data, inicializarlos
+    if (!data.swissData) {
+        data.swissData = data.players.map(name => ({ name, points: 0, buch: 0, wins: 0, losses: 0 }));
+    }
+
+    // Ordenar por puntos (descendente)
+    const sortedPlayers = [...data.swissData].sort((a, b) => b.points - a.points || b.buch - a.buch);
+
+    tableContainer.innerHTML = `
         <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; color: var(--text-primary)">
             <thead>
                 <tr style="border-bottom: 2px solid var(--border-color); text-align: left;">
                     <th style="padding: 10px;">Pos</th>
                     <th style="padding: 10px;">Jugador</th>
-                    <th style="padding: 10px;">Puntos</th>
-                    <th style="padding: 10px;">BUCH</th>
+                    <th style="padding: 10px; text-align: center;">Puntos</th>
+                    <th style="padding: 10px; text-align: center;">V - D</th>
                 </tr>
             </thead>
             <tbody>
-                ${playerNames.map((name, i) => `
+                ${sortedPlayers.map((p, i) => `
                     <tr style="border-bottom: 1px solid var(--border-color);">
                         <td style="padding: 10px;">${i + 1}</td>
-                        <td style="padding: 10px;">${name}</td>
-                        <td style="padding: 10px;">0</td>
-                        <td style="padding: 10px;">0</td>
+                        <td style="padding: 10px;">${p.name}</td>
+                        <td style="padding: 10px; text-align: center;">
+                            <input type="number" class="score-input" value="${p.points}" 
+                                onchange="updateSwissStats('${p.name}', 'points', this.value)">
+                        </td>
+                        <td style="padding: 10px; text-align: center;">
+                            <span style="color: #00FF7F">${p.wins}</span> - <span style="color: #ff4e4e">${p.losses}</span>
+                        </td>
                     </tr>
                 `).join('')}
             </tbody>
         </table>
-        <div style="margin-top: 1.5rem; text-align: center;">
-            <button class="btn-primary" onclick="alert('Funcionalidad de ronda en desarrollo')">Sortear Ronda 1</button>
+        <div style="margin-top: 1.5rem; text-align: center; display: flex; gap: 1rem; justify-content: center;">
+            <button class="btn-secondary" onclick="updateSwissWins()">Actualizar Victorias</button>
+            <button class="btn-primary" 
+                style="background-color: var(--accent-color); color: #000;"
+                onclick="finishSwiss()">Finalizar Torneo</button>
         </div>
     `;
-    container.appendChild(table);
+    container.appendChild(tableContainer);
 }
 
-function renderBrackets(playerNames, container) {
-    const numPlayers = playerNames.length;
+window.finishSwiss = function () {
+    if (confirm('¿Quieres finalizar el torneo y declarar al campeón?')) {
+        const data = loadTournament();
+        data.isFinished = true;
+        saveTournament(data);
+        renderTournament(data, document.getElementById('tournament-display'));
+    }
+};
+
+function renderBrackets(data, container) {
+    const numPlayers = data.players.length;
     const rounds = Math.ceil(Math.log2(numPlayers));
+
+    // Inicializar matriz de brackets si no existe
+    if (!data.brackets) {
+        data.brackets = [];
+        for (let r = 0; r < rounds; r++) {
+            const roundMatches = Math.pow(2, rounds - r - 1);
+            const matches = [];
+            for (let m = 0; m < roundMatches; m++) {
+                matches.push({
+                    p1: r === 0 ? (data.players[m * 2] || 'BYE') : 'TBD',
+                    p2: r === 0 ? (data.players[m * 2 + 1] || 'BYE') : 'TBD',
+                    s1: 0,
+                    s2: 0,
+                    winner: null
+                });
+            }
+            data.brackets.push(matches);
+        }
+        saveTournament(data);
+    }
+
     const bracketContainer = document.createElement('div');
     bracketContainer.style.display = 'flex';
     bracketContainer.style.gap = '2rem';
@@ -238,47 +315,78 @@ function renderBrackets(playerNames, container) {
     bracketContainer.style.padding = '1rem';
     bracketContainer.style.width = '100%';
 
-    for (let r = 0; r < rounds; r++) {
-        const roundMatches = Math.pow(2, rounds - r - 1);
+    data.brackets.forEach((roundMatches, r) => {
         const roundCol = document.createElement('div');
         roundCol.className = 'round-col';
         roundCol.innerHTML = `<h4 style="text-align: center; margin-bottom: 1rem; color: var(--text-secondary)">Ronda ${r + 1}</h4>`;
 
-        for (let m = 0; m < roundMatches; m++) {
-            const player1 = playerNames[m * 2] || 'BYE';
-            const player2 = playerNames[m * 2 + 1] || 'BYE';
+        roundMatches.forEach((match, m) => {
+            const matchDiv = document.createElement('div');
+            matchDiv.className = 'match-item';
 
-            const match = document.createElement('div');
-            match.style.cssText = `
-                background: var(--card-bg);
-                border: 1px solid var(--border-color);
-                border-radius: 4px;
-                padding: 0.5rem;
-                margin-bottom: 1rem;
-                min-width: 180px;
-                display: flex;
-                flex-direction: column;
-                gap: 5px;
-            `;
-            match.innerHTML = `
-                <div style="font-size: 0.85rem; border-bottom: 1px solid var(--border-color); padding-bottom: 4px; display: flex; justify-content: space-between;">
-                    <span>${player1}</span>
-                    <span style="color: var(--text-secondary)">0</span>
+            matchDiv.innerHTML = `
+                <div class="match-player ${match.winner === match.p1 ? 'winner' : ''}">
+                    <span>${match.p1}</span>
+                    <input type="number" class="score-input" value="${match.s1}" 
+                        onchange="updateMatchScore(${r}, ${m}, 's1', this.value)" 
+                        ${match.p1 === 'BYE' || match.p1 === 'TBD' ? 'disabled' : ''}>
                 </div>
-                <div style="font-size: 0.85rem; display: flex; justify-content: space-between;">
-                    <span>${player2}</span>
-                    <span style="color: var(--text-secondary)">0</span>
+                <div class="match-player ${match.winner === match.p2 ? 'winner' : ''}">
+                    <span>${match.p2}</span>
+                    <input type="number" class="score-input" value="${match.s2}" 
+                        onchange="updateMatchScore(${r}, ${m}, 's2', this.value)"
+                        ${match.p2 === 'BYE' || match.p2 === 'TBD' ? 'disabled' : ''}>
                 </div>
             `;
-            roundCol.appendChild(match);
-        }
+            roundCol.appendChild(matchDiv);
+        });
         bracketContainer.appendChild(roundCol);
-
-        // Para rondas posteriores, los nombres se limpian (TBD)
-        if (r === 0) playerNames = [];
-    }
+    });
     container.appendChild(bracketContainer);
 }
+
+// Funciones globales para manejar eventos onchange desde el HTML generado
+window.updateMatchScore = function (round, matchIdx, field, value) {
+    const data = loadTournament();
+    if (!data || !data.brackets) return;
+
+    const match = data.brackets[round][matchIdx];
+    match[field] = parseInt(value) || 0;
+
+    // Determinar ganador
+    if (match.s1 > match.s2) match.winner = match.p1;
+    else if (match.s2 > match.s1) match.winner = match.p2;
+    else match.winner = null;
+
+    // Progresar ganador si no es la última ronda
+    if (data.brackets[round + 1]) {
+        const nextMatchIdx = Math.floor(matchIdx / 2);
+        const nextPlayerField = matchIdx % 2 === 0 ? 'p1' : 'p2';
+        data.brackets[round + 1][nextMatchIdx][nextPlayerField] = match.winner || 'TBD';
+    }
+
+    saveTournament(data);
+    renderTournament(data, document.getElementById('tournament-display'));
+};
+
+window.updateSwissStats = function (playerName, field, value) {
+    const data = loadTournament();
+    if (!data || !data.swissData) return;
+
+    const player = data.swissData.find(p => p.name === playerName);
+    if (player) {
+        player[field] = parseFloat(value) || 0;
+        saveTournament(data);
+        // No re-renderizamos inmediatamente para no perder el foco del input
+    }
+};
+
+window.updateSwissWins = function () {
+    // Esta función podría calcular victorias automáticamente basado en rondas (si se implementaran los emparejamientos)
+    // Por ahora re-renderiza para aplicar ordenamiento por puntos
+    const data = loadTournament();
+    renderTournament(data, document.getElementById('tournament-display'));
+};
 
 // Asegurarse de que el DOM esté cargado antes de ejecutar
 document.addEventListener('DOMContentLoaded', () => {
