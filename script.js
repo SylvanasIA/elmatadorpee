@@ -228,52 +228,307 @@ function renderTournament(data, container) {
 }
 
 function renderSwissTable(data, container) {
-    const tableContainer = document.createElement('div');
-    tableContainer.style.width = '100%';
-
-    // Si no hay datos de rondas/puntuación en el objeto data, inicializarlos
+    // Inicializar swissData si no existe
     if (!data.swissData) {
-        data.swissData = data.players.map(name => ({ name, points: 0, buch: 0, wins: 0, losses: 0 }));
+        data.swissData = data.players.map(name => ({
+            name,
+            points: 0,
+            wins: 0,
+            losses: 0,
+            ties: 0
+        }));
     }
 
-    // Ordenar por puntos (descendente)
-    const sortedPlayers = [...data.swissData].sort((a, b) => b.points - a.points || b.buch - a.buch);
+    // Inicializar rondas si no existen
+    if (!data.swissRounds) {
+        data.swissRounds = [];
+        generateSwissRound(data);
+    }
 
-    tableContainer.innerHTML = `
-        <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; color: var(--text-primary)">
-            <thead>
-                <tr style="border-bottom: 2px solid var(--border-color); text-align: left;">
-                    <th style="padding: 10px;">Pos</th>
-                    <th style="padding: 10px;">Jugador</th>
-                    <th style="padding: 10px; text-align: center;">Puntos</th>
-                    <th style="padding: 10px; text-align: center;">V - D</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${sortedPlayers.map((p, i) => `
-                    <tr style="border-bottom: 1px solid var(--border-color);">
-                        <td style="padding: 10px;">${i + 1}</td>
-                        <td style="padding: 10px;">${p.name}</td>
-                        <td style="padding: 10px; text-align: center;">
-                            <input type="number" class="score-input" value="${p.points}" 
-                                onchange="updateSwissStats('${p.name}', 'points', this.value)">
-                        </td>
-                        <td style="padding: 10px; text-align: center;">
-                            <span style="color: #00FF7F">${p.wins}</span> - <span style="color: #ff4e4e">${p.losses}</span>
-                        </td>
+    // Inicializar pestaña activa (por defecto la última ronda)
+    if (data.activeSwissTab === undefined) {
+        data.activeSwissTab = data.swissRounds.length - 1;
+    }
+
+    const mainContainer = document.createElement('div');
+    mainContainer.className = 'swiss-container';
+
+    // 1. Navegación de Pestañas
+    const nav = document.createElement('div');
+    nav.className = 'swiss-nav';
+    
+    // Botones de Rondas
+    data.swissRounds.forEach((_, rIdx) => {
+        const btn = document.createElement('button');
+        btn.className = `swiss-tab-btn ${data.activeSwissTab === rIdx ? 'active' : ''}`;
+        btn.innerHTML = `<i class="fas fa-layer-group"></i> Ronda ${rIdx + 1}`;
+        btn.onclick = () => switchSwissTab(rIdx);
+        nav.appendChild(btn);
+    });
+
+    // Botón de Clasificación
+    const lbBtn = document.createElement('button');
+    lbBtn.className = `swiss-tab-btn tab-leaderboard ${data.activeSwissTab === 'leaderboard' ? 'active' : ''}`;
+    lbBtn.innerHTML = `<i class="fas fa-list-ol"></i> Clasificación`;
+    lbBtn.onclick = () => switchSwissTab('leaderboard');
+    nav.appendChild(lbBtn);
+
+    mainContainer.appendChild(nav);
+
+    // 2. Contenido de la Pestaña
+    const content = document.createElement('div');
+    content.className = 'swiss-tab-content';
+
+    if (data.activeSwissTab === 'leaderboard') {
+        // Renderizar Tabla de Clasificación
+        calculateSwissStats(data);
+        const sortedPlayers = [...data.swissData].sort((a, b) => b.points - a.points || b.wins - a.wins);
+
+        const leaderboardDiv = document.createElement('div');
+        leaderboardDiv.className = 'leaderboard-container';
+        leaderboardDiv.style.marginTop = '0'; // Sin margen extra en pestaña
+        leaderboardDiv.innerHTML = `
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Pos</th>
+                        <th>Jugador</th>
+                        <th style="text-align: center;">Puntos</th>
+                        <th style="text-align: center;">V - E - D</th>
                     </tr>
-                `).join('')}
-            </tbody>
-        </table>
-        <div style="margin-top: 1.5rem; text-align: center; display: flex; gap: 1rem; justify-content: center;">
-            <button class="btn-secondary" onclick="updateSwissWins()">Actualizar Victorias</button>
-            <button class="btn-primary" 
-                style="background-color: var(--accent-color); color: #000;"
-                onclick="finishSwiss()">Finalizar Torneo</button>
+                </thead>
+                <tbody>
+                    ${sortedPlayers.map((p, i) => `
+                        <tr class="${i === 0 ? 'is-first' : ''}">
+                            <td style="font-weight: 800; opacity: 0.5;">#${i + 1}</td>
+                            <td style="font-weight: 700;">${p.name}</td>
+                            <td style="text-align: center; color: var(--accent-color); font-weight: 800; font-size: 1.1rem;">${p.points}</td>
+                            <td style="text-align: center; font-size: 0.85rem; font-weight: 600;">
+                                <span style="color: var(--success)">${p.wins}</span> - 
+                                <span style="color: var(--warning)">${p.ties}</span> - 
+                                <span style="color: var(--danger)">${p.losses}</span>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+        content.appendChild(leaderboardDiv);
+    } else {
+        // Renderizar Ronda Específica
+        const rIdx = data.activeSwissTab;
+        const round = data.swissRounds[rIdx];
+        if (round) {
+            const roundDiv = document.createElement('div');
+            roundDiv.className = 'swiss-round';
+            
+            const isLatestRound = rIdx === data.swissRounds.length - 1;
+            
+            roundDiv.innerHTML = `
+                <h4>
+                    <span>Partidas de la Ronda ${rIdx + 1}</span>
+                    ${isLatestRound && !data.isFinished ? '<span class="actual-badge">Ronda actual</span>' : ''}
+                </h4>
+                <div class="swiss-matches-grid">
+                    ${round.matches.map((m, mIdx) => renderSwissMatch(m, rIdx, mIdx, data.isFinished)).join('')}
+                </div>
+            `;
+            content.appendChild(roundDiv);
+
+            // Botones de acción solo en la última ronda si no está terminado
+            if (isLatestRound && !data.isFinished) {
+                const actionsDiv = document.createElement('div');
+                actionsDiv.style.marginTop = '2rem';
+                actionsDiv.style.textAlign = 'center';
+                actionsDiv.style.display = 'flex';
+                actionsDiv.style.gap = '1rem';
+                actionsDiv.style.justifyContent = 'center';
+
+                actionsDiv.innerHTML = `
+                    <button class="btn-secondary" onclick="addNewSwissRound()">
+                        <i class="fas fa-plus"></i> Generar Siguiente Ronda
+                    </button>
+                    <button class="btn-primary" onclick="finishSwiss()" style="background-color: var(--accent-color); color: #000;">
+                        <i class="fas fa-flag-checkered"></i> Finalizar Torneo
+                    </button>
+                `;
+                content.appendChild(actionsDiv);
+            }
+        }
+    }
+
+    mainContainer.appendChild(content);
+    container.appendChild(mainContainer);
+}
+
+window.switchSwissTab = function(tabIndex) {
+    const data = loadTournament();
+    if (!data) return;
+    data.activeSwissTab = tabIndex;
+    saveTournament(data);
+    renderTournament(data, document.getElementById('tournament-display'));
+};
+
+function renderSwissMatch(match, rIdx, mIdx, isFinished) {
+    const p1Win = match.result === 'p1';
+    const p2Win = match.result === 'p2';
+    const isTie = match.result === 'tie';
+
+    if (match.p2 === 'BYE') {
+        return `
+            <div class="swiss-match-card" style="opacity: 0.8; border-style: dashed;">
+                <div class="match-players-row">
+                    <div class="player-box is-winner">${match.p1}</div>
+                    <div class="vs-circle">BYE</div>
+                    <div class="player-box" style="opacity: 0.3;">---</div>
+                </div>
+                <div style="font-size: 0.65rem; color: var(--success); text-align: center; font-weight: 800; letter-spacing: 1px;">
+                    VICTORIA AUTOMÁTICA
+                </div>
+            </div>
+        `;
+    }
+
+    const cardClass = p1Win ? 'p1-win' : (p2Win ? 'p2-win' : (isTie ? 'tie-win' : ''));
+
+    return `
+        <div class="swiss-match-card ${cardClass}">
+            <div class="match-players-row">
+                <div class="player-box ${p1Win ? 'is-winner' : ''}">${match.p1}</div>
+                <div class="vs-circle">VS</div>
+                <div class="player-box ${p2Win ? 'is-winner' : ''}">${match.p2}</div>
+            </div>
+            
+            ${!isFinished ? `
+                <div class="swiss-result-btns">
+                    <button class="result-btn ${p1Win ? 'active-win' : ''}" onclick="setSwissResult(${rIdx}, ${mIdx}, 'p1')">
+                        <i class="fas fa-trophy"></i> P1 Win
+                    </button>
+                    <button class="result-btn ${isTie ? 'active-tie' : ''}" onclick="setSwissResult(${rIdx}, ${mIdx}, 'tie')">
+                        <i class="fas fa-equals"></i> Tie
+                    </button>
+                    <button class="result-btn ${p2Win ? 'active-win' : ''}" onclick="setSwissResult(${rIdx}, ${mIdx}, 'p2')">
+                        <i class="fas fa-trophy"></i> P2 Win
+                    </button>
+                </div>
+            ` : `<div style="text-align:center; font-size: 0.7rem; color: var(--text-secondary); font-weight: 800; letter-spacing: 1px; margin-top: 5px;">
+                    <i class="fas fa-lock"></i> RESULTADO FINAL
+                 </div>`}
         </div>
     `;
-    container.appendChild(tableContainer);
 }
+
+function generateSwissRound(data) {
+    const players = [...data.players];
+    let pairings = [];
+    
+    if (data.swissRounds.length === 0) {
+        // Ronda 1: Aleatorio
+        const shuffled = players.sort(() => Math.random() - 0.5);
+        for (let i = 0; i < shuffled.length; i += 2) {
+            if (i + 1 < shuffled.length) {
+                pairings.push({ p1: shuffled[i], p2: shuffled[i + 1], result: null });
+            } else {
+                pairings.push({ p1: shuffled[i], p2: 'BYE', result: 'p1' });
+            }
+        }
+    } else {
+        // Rondas siguientes: Basado en puntos
+        calculateSwissStats(data);
+        const sorted = [...data.swissData].sort((a, b) => b.points - a.points || Math.random() - 0.5);
+        const pairedNames = new Set();
+        
+        for (let i = 0; i < sorted.length; i++) {
+            const p1Name = sorted[i].name;
+            if (pairedNames.has(p1Name)) continue;
+            
+            let found = false;
+            // Buscar oponente libre con puntos similares
+            for (let j = i + 1; j < sorted.length; j++) {
+                const p2Name = sorted[j].name;
+                if (!pairedNames.has(p2Name)) {
+                    pairings.push({ p1: p1Name, p2: p2Name, result: null });
+                    pairedNames.add(p1Name);
+                    pairedNames.add(p2Name);
+                    found = true;
+                    break;
+                }
+            }
+            
+            if (!found) {
+                // Si sobra uno, darle BYE
+                pairings.push({ p1: p1Name, p2: 'BYE', result: 'p1' });
+                pairedNames.add(p1Name);
+            }
+        }
+    }
+    
+    data.swissRounds.push({ matches: pairings });
+    saveTournament(data);
+}
+
+function calculateSwissStats(data) {
+    // Reiniciar stats
+    data.swissData.forEach(p => {
+        p.points = 0;
+        p.wins = 0;
+        p.losses = 0;
+        p.ties = 0;
+    });
+
+    // Procesar cada match de cada ronda
+    data.swissRounds.forEach(round => {
+        round.matches.forEach(m => {
+            const p1 = data.swissData.find(p => p.name === m.p1);
+            const p2 = data.swissData.find(p => p.name === m.p2);
+
+            if (m.result === 'p1') {
+                if (p1) { p1.points += 3; p1.wins += 1; }
+                if (p2 && m.p2 !== 'BYE') { p2.losses += 1; }
+            } else if (m.result === 'p2') {
+                if (p2) { p2.points += 3; p2.wins += 1; }
+                if (p1) { p1.losses += 1; }
+            } else if (m.result === 'tie') {
+                if (p1) { p1.points += 1; p1.ties += 1; }
+                if (p2) { p2.points += 1; p2.ties += 1; }
+            }
+        });
+    });
+}
+
+window.addNewSwissRound = function() {
+    const data = loadTournament();
+    // Verificar si la ronda actual está completa
+    const currentRound = data.swissRounds[data.swissRounds.length - 1];
+    const incomplete = currentRound.matches.some(m => !m.result && m.p2 !== 'BYE');
+    
+    if (incomplete) {
+        if (!confirm('Hay partidas sin resultado en la ronda actual. ¿Generar siguiente ronda de todas formas?')) {
+            return;
+        }
+    }
+    
+    generateSwissRound(data);
+    // Cambiar automáticamente a la nueva pestaña de ronda
+    data.activeSwissTab = data.swissRounds.length - 1;
+    saveTournament(data);
+    renderTournament(data, document.getElementById('tournament-display'));
+};
+
+window.setSwissResult = function(rIdx, mIdx, result) {
+    const data = loadTournament();
+    const match = data.swissRounds[rIdx].matches[mIdx];
+    
+    // Toggle result: si haces click en el mismo, se borra
+    if (match.result === result) {
+        match.result = null;
+    } else {
+        match.result = result;
+    }
+    
+    saveTournament(data);
+    renderTournament(data, document.getElementById('tournament-display'));
+};
 
 window.finishSwiss = function () {
     if (confirm('¿Quieres finalizar el torneo y declarar al campeón?')) {
@@ -377,7 +632,6 @@ window.updateSwissStats = function (playerName, field, value) {
     if (player) {
         player[field] = parseFloat(value) || 0;
         saveTournament(data);
-        // No re-renderizamos inmediatamente para no perder el foco del input
     }
 };
 

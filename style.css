@@ -9,6 +9,9 @@
     --text-secondary: #ADADB8;
     --accent-color: #BF94FF;
     --border-color: #2D2D33;
+    --success: #00FF7F;
+    --warning: #FFD700;
+    --danger: #ff4e4e;
 }
 
 * {
@@ -23,24 +26,20 @@ body {
     color: var(--text-primary);
     line-height: 1.6;
     padding: 1rem;
-    /* Reducido para más espacio */
 }
 
 .container {
     max-width: 1400px;
-    /* Aumentado para mayor densidad horizontal */
     margin: 0 auto;
 }
 
 header {
     text-align: center;
     margin-bottom: 1.5rem;
-    /* Reducido */
 }
 
 header h1 {
     font-size: 2rem;
-    /* Ligeramente más pequeño */
     color: var(--twitch-purple);
     text-transform: uppercase;
     letter-spacing: 2px;
@@ -51,12 +50,55 @@ header p {
     font-size: 0.9rem;
 }
 
+/* Tabs logic */
+.tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    padding: 0.8rem 1.5rem;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tab-btn.active {
+    color: var(--twitch-light-purple);
+    border-bottom: 3px solid var(--twitch-purple);
+    background: rgba(145, 70, 255, 0.1);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.4s ease forwards;
+}
+
+/* Rewards Grid & Cards */
 .rewards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-    /* Reducido de 280px a 210px */
-    gap: 1rem;
-    /* Reducido de 2rem a 1rem */
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.5rem;
 }
 
 .reward-card {
@@ -78,14 +120,12 @@ header p {
 .reward-image-container {
     width: 100%;
     aspect-ratio: 5 / 7;
-    /* Ajustado para el formato de carta Pokemon */
     padding: 0.5rem;
     background: linear-gradient(135deg, #1f1f23 0%, #0e0e10 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    /* Added for language badge */
 }
 
 .reward-image {
@@ -113,7 +153,6 @@ header p {
 
 .reward-info {
     padding: 0.8rem;
-    /* Reducido de 1.5rem */
     flex-grow: 1;
     display: flex;
     flex-direction: column;
@@ -121,7 +160,6 @@ header p {
 
 .reward-name {
     font-size: 0.95rem;
-    /* Más compacto */
     font-weight: 700;
     margin-bottom: 0.4rem;
     white-space: nowrap;
@@ -171,50 +209,6 @@ header p {
 .status-limited {
     background-color: rgba(255, 165, 0, 0.1);
     color: #FFA500;
-}
-
-/* Tabs logic */
-.tabs {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 0.5rem;
-}
-
-.tab-btn {
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    padding: 0.8rem 1.5rem;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    border-radius: 8px 8px 0 0;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.tab-btn:hover {
-    color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.tab-btn.active {
-    color: var(--twitch-light-purple);
-    border-bottom: 3px solid var(--twitch-purple);
-    background: rgba(145, 70, 255, 0.1);
-}
-
-.tab-content {
-    display: none;
-}
-
-.tab-content.active {
-    display: block;
-    animation: fadeIn 0.4s ease forwards;
 }
 
 /* Tournament Config */
@@ -328,24 +322,276 @@ header p {
     flex-wrap: wrap;
 }
 
+/* Swiss UI Enhancements */
+.swiss-container {
+    animation: fadeIn 0.5s ease;
+}
+
+.swiss-rounds {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.swiss-round {
+    background: rgba(45, 45, 51, 0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+}
+
+/* Swiss Sub-Tabs Styles */
+.swiss-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    background: rgba(45, 45, 51, 0.4);
+    padding: 0.6rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.swiss-tab-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-secondary);
+    padding: 0.7rem 1.4rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.swiss-tab-btn i {
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+.swiss-tab-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+.swiss-tab-btn.active {
+    background: rgba(145, 70, 255, 0.15);
+    color: var(--twitch-light-purple);
+    border-color: rgba(145, 70, 255, 0.4);
+    box-shadow: 0 4px 12px rgba(145, 70, 255, 0.1);
+}
+
+.swiss-tab-btn.tab-leaderboard {
+    margin-left: auto;
+    border-color: rgba(191, 148, 255, 0.3);
+    color: var(--accent-color);
+}
+
+.swiss-tab-btn.tab-leaderboard.active {
+    background: rgba(191, 148, 255, 0.15);
+}
+
+@media (max-width: 768px) {
+    .swiss-tab-btn.tab-leaderboard {
+        margin-left: 0;
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+.swiss-round h4 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
+    color: var(--text-primary);
+}
+
+.actual-badge {
+    font-size: 0.7rem;
+    background: var(--twitch-purple);
+    color: white;
+    padding: 2px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.swiss-matches-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.2rem;
+}
+
+.swiss-match-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.swiss-match-card:hover {
+    border-color: var(--accent-color);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+.swiss-match-card.p1-win { border-color: var(--success); box-shadow: 0 0 15px rgba(0, 255, 127, 0.15); }
+.swiss-match-card.p2-win { border-color: var(--success); box-shadow: 0 0 15px rgba(0, 255, 127, 0.15); }
+.swiss-match-card.tie-win { border-color: var(--warning); box-shadow: 0 0 15px rgba(255, 215, 0, 0.15); }
+
+.match-players-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.player-box {
+    flex: 1;
+    text-align: center;
+    padding: 0.8rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.player-box.is-winner {
+    background: rgba(0, 255, 127, 0.1);
+    color: var(--success);
+    border-color: rgba(0, 255, 127, 0.3);
+}
+
+.vs-circle {
+    width: 30px;
+    height: 30px;
+    background: var(--border-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.swiss-result-btns {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding-top: 0.8rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.result-btn {
+    padding: 8px 4px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.result-btn i { font-size: 1rem; }
+
+.result-btn:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-primary); }
+
+.result-btn.active-win { background: var(--success); color: #000; border-color: var(--success); }
+.result-btn.active-tie { background: var(--warning); color: #000; border-color: var(--warning); }
+
+/* Leaderboard */
+.leaderboard-container {
+    margin-top: 3rem;
+    background: var(--card-bg);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+}
+
+.leaderboard-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+
+.leaderboard-table th {
+    padding: 12px;
+    text-align: left;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.leaderboard-table tr td {
+    padding: 15px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    transition: all 0.3s ease;
+}
+
+.leaderboard-table tr td:first-child { border-radius: 8px 0 0 8px; }
+.leaderboard-table tr td:last-child { border-radius: 0 8px 8px 0; }
+
+.leaderboard-table tr:hover td {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.leaderboard-table tr.is-first td {
+    border-top: 1px solid rgba(191, 148, 255, 0.3);
+    border-bottom: 1px solid rgba(191, 148, 255, 0.3);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Brackets sync */
+.match-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.champion-banner {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    padding: 2.5rem;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+    text-align: center;
+    color: #000;
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.3);
+}
+
 .player-names-grid {
     margin-top: 2rem;
     margin-bottom: 2rem;
     padding-top: 1.5rem;
     border-top: 1px solid var(--border-color);
-}
-
-.player-names-grid h3 {
-    margin-bottom: 1.2rem;
-    font-size: 1.1rem;
-    color: var(--text-secondary);
-}
-
-.inputs-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
 }
 
 .player-input-item {
@@ -356,153 +602,4 @@ header p {
     padding: 0.5rem;
     border-radius: 6px;
     border: 1px solid var(--border-color);
-}
-
-.player-input-item span {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    min-width: 25px;
-}
-
-.player-input-item input {
-    background: transparent;
-    border: none;
-    color: var(--text-primary);
-    width: 100%;
-    font-size: 0.9rem;
-}
-
-.player-input-item input:focus {
-    outline: none;
-}
-
-/* Score Inputs */
-.score-input {
-    width: 35px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    text-align: center;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    padding: 2px;
-}
-
-.score-input:focus {
-    outline: none;
-    border-color: var(--twitch-purple);
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.match-item {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    padding: 0.6rem;
-    margin-bottom: 1rem;
-    min-width: 200px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    transition: border-color 0.3s ease;
-}
-
-.match-item:hover {
-    border-color: var(--text-secondary);
-}
-
-.match-player {
-    font-size: 0.85rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.winner {
-    color: var(--twitch-light-purple);
-    font-weight: 700;
-}
-
-/* Champion Celebration */
-.champion-banner {
-    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-    padding: 2rem;
-    border-radius: 12px;
-    margin-bottom: 2rem;
-    text-align: center;
-    color: #000;
-    box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
-    animation: celebrate 1s ease infinite alternate;
-    width: 100%;
-}
-
-.champion-banner h2 {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-    text-transform: uppercase;
-    letter-spacing: 4px;
-}
-
-.champion-banner .champion-name {
-    font-size: 2rem;
-    font-weight: 800;
-    margin-bottom: 1rem;
-}
-
-.champion-banner i {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    display: block;
-}
-
-@keyframes celebrate {
-    from {
-        transform: scale(1);
-        box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-    }
-
-    to {
-        transform: scale(1.02);
-        box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);
-    }
-}
-
-/* Tournament Display */
-.tournament-display {
-    min-height: 300px;
-    background-color: rgba(24, 24, 27, 0.5);
-    border-radius: 12px;
-    border: 1px dashed var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-}
-
-.empty-state {
-    text-align: center;
-    color: var(--text-secondary);
-}
-
-.empty-state i {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    opacity: 0.5;
-}
-
-/* Animations */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.reward-card {
-    animation: fadeIn 0.4s ease forwards;
 }
