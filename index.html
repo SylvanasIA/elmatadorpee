@@ -14,7 +14,10 @@
 <body>
     <div class="container">
         <nav class="tabs">
-            <button class="tab-btn active" data-tab="rewards">
+            <button class="tab-btn active" data-tab="pokemon">
+                <i class="fas fa-paw"></i> Pokémon
+            </button>
+            <button class="tab-btn" data-tab="rewards">
                 <i class="fas fa-gift"></i> Recompensas
             </button>
             <button class="tab-btn" data-tab="tournament">
@@ -22,7 +25,7 @@
             </button>
         </nav>
 
-        <main id="rewards-section" class="tab-content active">
+        <main id="rewards-section" class="tab-content">
             <div id="rewards-container" class="rewards-grid">
                 <!-- Dynamically loaded content will go here -->
                 <div class="loading">Cargando recompensas...</div>
@@ -80,9 +83,28 @@
                 </div>
             </div>
         </main>
+
+        <main id="pokemon-section" class="tab-content active">
+            <div class="tournament-config" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h2 style="margin-bottom: 0.5rem;"><i class="fas fa-book"></i> Pokedex</h2>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">Información detallada, versiones y en qué juegos se pueden usar.</p>
+                </div>
+                <button id="reset-pokedex" class="btn-danger" style="display: none;">
+                    <i class="fas fa-trash"></i> Borrar Progreso
+                </button>
+            </div>
+            <div id="pokemon-container" class="rewards-grid" style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));">
+                <div class="loading" style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary); padding: 3rem;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                    <p>Cargando datos de la PokeAPI...</p>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script src="script.js"></script>
+    <script src="pokemon.js"></script>
 </body>
 
 </html>
