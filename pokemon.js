@@ -115,6 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const results = await Promise.all(promises);
 
             if (i === 0) container.innerHTML = ''; // Limpiar loader inicial
+            
             results.forEach((item, index) => {
                 if (!item) return;
                 
@@ -201,6 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
 
                     localStorage.setItem('ownedPokemon', JSON.stringify(ownedPokemon));
+                    updatePokedexCounter();
                     
                     const resetBtn = document.getElementById('reset-pokedex');
                     const hasSomeProgress = ownedPokemon.length > 0 || shinyPokemon.length > 0;
@@ -235,6 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         });
 
                         localStorage.setItem('shinyPokemon', JSON.stringify(shinyPokemon));
+                        updatePokedexCounter();
                         
                         const resetBtn = document.getElementById('reset-pokedex');
                         const hasSomeProgress = ownedPokemon.length > 0 || shinyPokemon.length > 0;
@@ -246,6 +249,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 container.appendChild(card);
                 loadedCount++;
             });
+            updatePokedexCounter();
+        }
+    }
+
+    function updatePokedexCounter() {
+        const counterEl = document.getElementById('pokedex-counter');
+        if (!counterEl) return;
+
+        // Calculate unique base names in the whole list (static total)
+        const uniqueBases = new Set();
+        rawPokemonList.forEach(name => {
+            let bName = name;
+            const instanceId = 0; // We need to simulate the suffix logic
+            
+            // To be accurate, we should use the same logic as getPokeApiSlug
+            // But it's easier to just count unique data-base-name elements from DOM once loaded
+            // or pre-calculate from rawPokemonList + regional manual mapping
+        });
+
+        // Simpler way: look at the cards in the DOM
+        const allCards = container.querySelectorAll('.reward-card');
+        const uniqueBaseNames = new Set();
+        const caughtBaseNames = new Set();
+
+        allCards.forEach(card => {
+            const base = card.getAttribute('data-base-name');
+            uniqueBaseNames.add(base);
+            if (card.classList.contains('pokemon-owned')) {
+                caughtBaseNames.add(base);
+            }
+        });
+
+        if (allCards.length > 0) {
+            counterEl.textContent = `${caughtBaseNames.size} / ${uniqueBaseNames.size}`;
         }
     }
 
@@ -268,6 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     card.classList.remove('pokemon-owned');
                     card.classList.remove('pokemon-shiny');
                 });
+                updatePokedexCounter();
                 resetBtn.style.display = 'none';
             }
         });
