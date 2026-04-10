@@ -606,19 +606,44 @@ header p {
 
 /* Pokemon Pokedex Selection Styles */
 #pokemon-container .reward-card {
-    filter: grayscale(100%) opacity(0.5) !important;
     transition: all 0.4s ease;
     cursor: pointer;
+    background: var(--card-bg);
+}
+
+/* Solo la imagen y bordes se ponen grises si no está capturado */
+#pokemon-container .reward-card .poke-image {
+    filter: grayscale(100%) opacity(0.6) drop-shadow(0 8px 12px rgba(0,0,0,0.6)) !important;
+    transition: all 0.4s ease;
+}
+
+#pokemon-container .reward-card {
+    opacity: 0.7;
+    transition: all 0.4s ease;
+}
+
+#pokemon-container .reward-card:not(.pokemon-owned):not(.pokemon-wishlist) .type-tag {
+    background: #333 !important;
+    color: #888 !important;
+    text-shadow: none !important;
+}
+
+#pokemon-container .reward-card.pokemon-owned,
+#pokemon-container .reward-card.pokemon-wishlist {
+    opacity: 1 !important;
 }
 
 #pokemon-container .reward-card.pokemon-owned {
-    filter: grayscale(0%) opacity(1) !important;
-    border-color: #2ecc71;
-    box-shadow: 0 0 20px rgba(46, 204, 113, 0.2);
+    border-color: #2ecc71 !important;
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.2) !important;
 }
 
 #pokemon-container .reward-card.pokemon-owned .poke-image {
-    filter: drop-shadow(0 8px 12px rgba(46, 204, 113, 0.4)) !important;
+    filter: grayscale(0%) opacity(1) drop-shadow(0 8px 12px rgba(46, 204, 113, 0.4)) !important;
+}
+
+#pokemon-container .reward-card.pokemon-wishlist .poke-image {
+    filter: grayscale(100%) opacity(0.9) drop-shadow(0 8px 20px rgba(255, 105, 180, 0.4)) !important;
 }
 
 .owned-badge {

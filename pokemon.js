@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const spriteShiny = data.sprites.other['official-artwork'].front_shiny || data.sprites.front_shiny || spriteDefault;
                 
                 const types = data.types.map(t => t.type.name);
-                const typeTags = types.map(t => `<span style="background:${typeColors[t]}; padding: 2px 6px; border-radius: 4px; font-size:0.7rem; color:#fff; text-shadow: 1px 1px 1px #000; text-transform: uppercase;">${t}</span>`).join(' ');
+                                const typeTags = types.map(t => `<span class="type-tag" style="background:${typeColors[t]}; padding: 2px 6px; border-radius: 4px; font-size:0.7rem; color:#fff; text-shadow: 1px 1px 1px #000; text-transform: uppercase;">${t}</span>`).join(' ');
                 
                 const bgType = types[0];
                 const bgGradient = `linear-gradient(135deg, ${typeColors[bgType]}44 0%, #0e0e10 100%)`;
@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 card.innerHTML = `
                     <div class="reward-image-container" style="background: ${bgGradient}; height: 150px; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 1rem; display: flex; align-items: center; justify-content: center; position: relative;">
-                        <img src="${activeSprite}" alt="${displayName}" style="max-height: 110px; max-width: 110px; object-fit: contain; filter: drop-shadow(0 8px 12px rgba(0,0,0,0.6));" class="poke-image">
+                        <img src="${activeSprite}" alt="${displayName}" style="max-height: 110px; max-width: 110px; object-fit: contain;" class="poke-image">
                         <div class="card-language" style="position: absolute; top: 10px; left: 10px; background: transparent; border:none; padding: 2px 6px; font-weight: bold; font-size: 0.8rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.9);">#${absoluteIndex.toString().padStart(2, '0')}</div>
                         <div class="card-language" style="background: transparent; border:none; text-shadow: 1px 1px 3px rgba(0,0,0,0.9); font-size: 0.8rem;">#${data.id.toString().padStart(3, '0')}</div>
                         <div class="owned-badge"><i class="fas fa-check"></i></div>
