@@ -195,21 +195,26 @@ document.addEventListener('DOMContentLoaded', () => {
                     const currentlyOwned = card.classList.contains('pokemon-owned');
                     const newState = !currentlyOwned;
                     
-                    // Synchronize all related Megas/Base forms
-                    const relatedCards = container.querySelectorAll(`[data-base-name="${baseName}"]`);
-                    relatedCards.forEach(c => {
-                        const targetId = c.getAttribute('data-id-ref');
-                        if (newState) {
-                            c.classList.add('pokemon-owned');
-                            if (!ownedPokemon.includes(targetId)) ownedPokemon.push(targetId);
-                        } else {
-                            c.classList.remove('pokemon-owned');
-                            ownedPokemon = ownedPokemon.filter(id => id !== targetId);
-                        }
-                    });
+                        // Synchronize all related Megas/Base forms
+                        const relatedCards = container.querySelectorAll(`[data-base-name="${baseName}"]`);
+                        relatedCards.forEach(c => {
+                            const targetId = c.getAttribute('data-id-ref');
+                            if (newState) {
+                                c.classList.add('pokemon-owned');
+                                if (!ownedPokemon.includes(targetId)) ownedPokemon.push(targetId);
+                                
+                                // EXCEPTION: If owned, it cannot be in wishlist
+                                c.classList.remove('pokemon-wishlist');
+                                wishlistPokemon = wishlistPokemon.filter(id => id !== targetId);
+                            } else {
+                                c.classList.remove('pokemon-owned');
+                                ownedPokemon = ownedPokemon.filter(id => id !== targetId);
+                            }
+                        });
 
-                    localStorage.setItem('ownedPokemon', JSON.stringify(ownedPokemon));
-                    updatePokedexCounter();
+                        localStorage.setItem('ownedPokemon', JSON.stringify(ownedPokemon));
+                        localStorage.setItem('wishlistPokemon', JSON.stringify(wishlistPokemon));
+                        updatePokedexCounter();
                     
                     const resetBtn = document.getElementById('reset-pokedex');
                     const hasSomeProgress = ownedPokemon.length > 0 || shinyPokemon.length > 0;
@@ -257,6 +262,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (wishlistBtn) {
                     wishlistBtn.addEventListener('click', (e) => {
                         e.stopPropagation();
+
+                        // Only works if NOT owned
+                        if (card.classList.contains('pokemon-owned')) return;
+
                         const currentlyWishlisted = card.classList.contains('pokemon-wishlist');
                         const newState = !currentlyWishlisted;
                         

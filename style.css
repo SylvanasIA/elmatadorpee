@@ -831,15 +831,16 @@ body.viewing-pokedex #pokemon-container .reward-card {
     pointer-events: none !important;
 }
 
-body.viewing-pokedex .share-controls {
+.reward-card.pokemon-owned .wishlist-btn {
     display: none !important;
 }
+
 /* --- Fin Estilos Compartir --- */
 
 /* --- Estilos Lista de Deseos (Wishlist) --- */
 .wishlist-btn {
     position: absolute;
-    top: 10px;
+    bottom: 10px;
     right: 10px;
     background: rgba(0, 0, 0, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.1);
