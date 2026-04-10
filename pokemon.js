@@ -79,6 +79,11 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (base === "aegislash") slug = "aegislash-shield";
         else if (base === "gourgeist") slug = "gourgeist-average";
         else if (base === "palafin") slug = "palafin-zero";
+        else if (base === "meowstic") slug = "meowstic-male";
+        else if (base === "lycanroc") slug = "lycanroc-midday";
+        else if (base === "morpeko") slug = "morpeko-full-belly";
+        else if (base === "basculegion") slug = "basculegion-male";
+        else if (base === "maushold") slug = "maushold-family-of-four";
 
         return { slug, suffix };
     }
@@ -141,6 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const customId = `poke_${absoluteIndex}`;
                 const isShinySaved = shinyPokemon.includes(customId);
+                const isWishlistSaved = wishlistPokemon.includes(customId);
                 const activeSprite = isShinySaved ? spriteShiny : spriteDefault;
 
                 card.innerHTML = `
@@ -150,6 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="card-language" style="background: transparent; border:none; text-shadow: 1px 1px 3px rgba(0,0,0,0.9); font-size: 0.8rem;">#${data.id.toString().padStart(3, '0')}</div>
                         <div class="owned-badge"><i class="fas fa-check"></i></div>
                         <div class="shiny-btn" title="Activar modo Shiny"><i class="fas fa-star"></i></div>
+                        <div class="wishlist-btn" title="¡Lo quiero! (Añadir a lista de deseos)"><i class="fas fa-heart"></i></div>
                     </div>
                     <div class="reward-info" style="gap: 2px;">
                         <h2 class="reward-name" title="${displayName}" style="color: var(--text-primary); text-transform: capitalize; margin-bottom: 4px; font-size: 1.15rem; font-weight: 800;">${displayName}</h2>
@@ -240,9 +247,42 @@ document.addEventListener('DOMContentLoaded', () => {
                         updatePokedexCounter();
                         
                         const resetBtn = document.getElementById('reset-pokedex');
-                        const hasSomeProgress = ownedPokemon.length > 0 || shinyPokemon.length > 0;
+                        const hasSomeProgress = ownedPokemon.length > 0 || shinyPokemon.length > 0 || wishlistPokemon.length > 0;
                         if (resetBtn) resetBtn.style.display = hasSomeProgress ? 'inline-flex' : 'none';
                     });
+                }
+
+                // Wishlist toggle logic
+                const wishlistBtn = card.querySelector('.wishlist-btn');
+                if (wishlistBtn) {
+                    wishlistBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const currentlyWishlisted = card.classList.contains('pokemon-wishlist');
+                        const newState = !currentlyWishlisted;
+                        
+                        // Synchronize all related Megas/Base forms for Wishlist status
+                        const relatedCards = container.querySelectorAll(`[data-base-name="${baseName}"]`);
+                        relatedCards.forEach(c => {
+                            const targetId = c.getAttribute('data-id-ref');
+                            if (newState) {
+                                c.classList.add('pokemon-wishlist');
+                                if (!wishlistPokemon.includes(targetId)) wishlistPokemon.push(targetId);
+                            } else {
+                                c.classList.remove('pokemon-wishlist');
+                                wishlistPokemon = wishlistPokemon.filter(id => id !== targetId);
+                            }
+                        });
+
+                        localStorage.setItem('wishlistPokemon', JSON.stringify(wishlistPokemon));
+                        
+                        const resetBtn = document.getElementById('reset-pokedex');
+                        const hasSomeProgress = ownedPokemon.length > 0 || shinyPokemon.length > 0 || wishlistPokemon.length > 0;
+                        if (resetBtn) resetBtn.style.display = hasSomeProgress ? 'inline-flex' : 'none';
+                    });
+                }
+
+                if (isWishlistSaved) {
+                    card.classList.add('pokemon-wishlist');
                 }
 
                 card.setAttribute('data-id-ref', customId);
@@ -291,8 +331,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let loaded = false;
     let ownedPokemon = JSON.parse(localStorage.getItem('ownedPokemon') || '[]');
     let shinyPokemon = JSON.parse(localStorage.getItem('shinyPokemon') || '[]');
+    let wishlistPokemon = JSON.parse(localStorage.getItem('wishlistPokemon') || '[]');
     let tempLocalOwned = null;
     let tempLocalShiny = null;
+    let tempLocalWishlist = null;
     let isViewingFriend = false;
 
     // --- Lógica de Usuario ---
@@ -311,11 +353,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (confirm('¿Estás seguro de que deseas borrar todo tu progreso de captura (incluyendo Shinies)?')) {
                 localStorage.removeItem('ownedPokemon');
                 localStorage.removeItem('shinyPokemon');
+                localStorage.removeItem('wishlistPokemon');
                 ownedPokemon = [];
                 shinyPokemon = [];
+                wishlistPokemon = [];
                 document.querySelectorAll('.reward-card').forEach(card => {
                     card.classList.remove('pokemon-owned');
                     card.classList.remove('pokemon-shiny');
+                    card.classList.remove('pokemon-wishlist');
                 });
                 updatePokedexCounter();
                 resetBtn.style.display = 'none';
@@ -352,6 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 u: username,
                 o: ownedPokemon,
                 s: shinyPokemon,
+                w: wishlistPokemon,
                 v: 1 // Versión del formato
             };
             
@@ -392,11 +438,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!isViewingFriend) {
                     tempLocalOwned = [...ownedPokemon];
                     tempLocalShiny = [...shinyPokemon];
+                    tempLocalWishlist = [...wishlistPokemon];
                 }
 
                 isViewingFriend = true;
                 ownedPokemon = data.o;
                 shinyPokemon = data.s;
+                wishlistPokemon = data.w || [];
 
                 // Actualizar UI
                 document.body.classList.add('viewing-pokedex');
@@ -420,6 +468,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Restaurar local
             ownedPokemon = tempLocalOwned;
             shinyPokemon = tempLocalShiny;
+            wishlistPokemon = tempLocalWishlist;
             isViewingFriend = false;
 
             document.body.classList.remove('viewing-pokedex');
@@ -453,6 +502,13 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 card.classList.remove('pokemon-shiny');
                 if (img && sDefault) img.src = sDefault;
+            }
+
+            //Wishlist
+            if (wishlistPokemon.includes(id)) {
+                card.classList.add('pokemon-wishlist');
+            } else {
+                card.classList.remove('pokemon-wishlist');
             }
         });
     }

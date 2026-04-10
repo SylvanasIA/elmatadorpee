@@ -835,3 +835,58 @@ body.viewing-pokedex .share-controls {
     display: none !important;
 }
 /* --- Fin Estilos Compartir --- */
+
+/* --- Estilos Lista de Deseos (Wishlist) --- */
+.wishlist-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.4);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 15;
+    transition: all 0.3s ease;
+    font-size: 0.8rem;
+}
+
+.wishlist-btn:hover {
+    background: rgba(255, 105, 180, 0.2);
+    color: #ff69b4;
+    transform: scale(1.1);
+}
+
+.reward-card.pokemon-wishlist .wishlist-btn {
+    background: #ff69b4;
+    color: #fff;
+    box-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+    border-color: #ff69b4;
+}
+
+.reward-card.pokemon-wishlist {
+    border-color: #ff69b4 !important;
+    box-shadow: 0 0 25px rgba(255, 105, 180, 0.25) !important;
+    background: linear-gradient(135deg, rgba(255, 105, 180, 0.1) 0%, #0e0e10 100%) !important;
+}
+
+.reward-card.pokemon-wishlist .reward-name {
+    color: #ffb6c1 !important;
+}
+
+@keyframes heartBeat {
+    0% { transform: scale(1); }
+    15% { transform: scale(1.3); }
+    30% { transform: scale(1); }
+    45% { transform: scale(1.15); }
+    60% { transform: scale(1); }
+}
+
+.reward-card.pokemon-wishlist .wishlist-btn i {
+    animation: heartBeat 1.5s ease-in-out infinite;
+}
