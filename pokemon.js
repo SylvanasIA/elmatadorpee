@@ -291,6 +291,18 @@ document.addEventListener('DOMContentLoaded', () => {
     let loaded = false;
     let ownedPokemon = JSON.parse(localStorage.getItem('ownedPokemon') || '[]');
     let shinyPokemon = JSON.parse(localStorage.getItem('shinyPokemon') || '[]');
+    let tempLocalOwned = null;
+    let tempLocalShiny = null;
+    let isViewingFriend = false;
+
+    // --- Lógica de Usuario ---
+    const usernameInput = document.getElementById('pokedex-username');
+    if (usernameInput) {
+        usernameInput.value = localStorage.getItem('pokedex_username') || '';
+        usernameInput.addEventListener('input', (e) => {
+            localStorage.setItem('pokedex_username', e.target.value);
+        });
+    }
 
     const resetBtn = document.getElementById('reset-pokedex');
     if (resetBtn) {
@@ -324,5 +336,124 @@ document.addEventListener('DOMContentLoaded', () => {
             loaded = true;
             loadPokemon();
         }
+    }
+
+    // --- Lógica de Compartir ---
+    const shareBtn = document.getElementById('share-pokedex-btn');
+    const viewFriendBtn = document.getElementById('view-shared-btn');
+    const exitViewBtn = document.getElementById('exit-view-mode');
+    const viewBanner = document.getElementById('view-mode-banner');
+    const sharedNameDisplay = document.getElementById('shared-username-display');
+
+    if (shareBtn) {
+        shareBtn.addEventListener('click', () => {
+            const username = (usernameInput ? usernameInput.value : "") || "Entrenador Anónimo";
+            const data = {
+                u: username,
+                o: ownedPokemon,
+                s: shinyPokemon,
+                v: 1 // Versión del formato
+            };
+            
+            try {
+                const jsonStr = JSON.stringify(data);
+                const base64 = btoa(unescape(encodeURIComponent(jsonStr)));
+                
+                // Copiar al portapapeles
+                navigator.clipboard.writeText(base64).then(() => {
+                    const originalText = shareBtn.innerHTML;
+                    shareBtn.innerHTML = '<i class="fas fa-check"></i> ¡Copiado!';
+                    shareBtn.classList.replace('btn-primary', 'btn-success');
+                    
+                    setTimeout(() => {
+                        shareBtn.innerHTML = originalText;
+                        shareBtn.classList.replace('btn-success', 'btn-primary');
+                    }, 2000);
+                });
+            } catch (e) {
+                alert('Error al generar el código.');
+                console.error(e);
+            }
+        });
+    }
+
+    if (viewFriendBtn) {
+        viewFriendBtn.addEventListener('click', () => {
+            const code = prompt('Pega aquí el código de la Pokedex de tu amigo:');
+            if (!code) return;
+
+            try {
+                const jsonStr = decodeURIComponent(escape(atob(code)));
+                const data = JSON.parse(jsonStr);
+
+                if (!data.o || !data.s) throw new Error('Formato inválido');
+
+                // Entrar en modo ver
+                if (!isViewingFriend) {
+                    tempLocalOwned = [...ownedPokemon];
+                    tempLocalShiny = [...shinyPokemon];
+                }
+
+                isViewingFriend = true;
+                ownedPokemon = data.o;
+                shinyPokemon = data.s;
+
+                // Actualizar UI
+                document.body.classList.add('viewing-pokedex');
+                if (viewBanner) viewBanner.style.display = 'flex';
+                if (sharedNameDisplay) sharedNameDisplay.textContent = data.u || "Amigo";
+                
+                refreshPokedexUI();
+                updatePokedexCounter();
+
+            } catch (e) {
+                alert('El código no es válido o está corrupto.');
+                console.error(e);
+            }
+        });
+    }
+
+    if (exitViewBtn) {
+        exitViewBtn.addEventListener('click', () => {
+            if (!isViewingFriend) return;
+
+            // Restaurar local
+            ownedPokemon = tempLocalOwned;
+            shinyPokemon = tempLocalShiny;
+            isViewingFriend = false;
+
+            document.body.classList.remove('viewing-pokedex');
+            if (viewBanner) viewBanner.style.display = 'none';
+
+            refreshPokedexUI();
+            updatePokedexCounter();
+        });
+    }
+
+    function refreshPokedexUI() {
+        const cards = document.querySelectorAll('.reward-card');
+        cards.forEach(card => {
+            const id = card.getAttribute('data-id-ref');
+            
+            //Owned
+            if (ownedPokemon.includes(id)) {
+                card.classList.add('pokemon-owned');
+            } else {
+                card.classList.remove('pokemon-owned');
+            }
+
+            //Shiny
+            const img = card.querySelector('.poke-image');
+            const sShiny = card.getAttribute('data-sprite-shiny');
+            const sDefault = card.getAttribute('data-sprite-default');
+
+            if (shinyPokemon.includes(id)) {
+                card.classList.add('pokemon-shiny');
+                if (img && sShiny) img.src = sShiny;
+            } else {
+                card.classList.remove('pokemon-shiny');
+                if (img && sDefault) img.src = sDefault;
+            }
+        });
     }
 });

@@ -776,3 +776,62 @@ header p {
         justify-content: center;
     }
 }
+
+/* --- Estilos para Compartir --- */
+.share-controls input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.share-controls input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 4px rgba(169, 112, 255, 0.1);
+}
+
+.view-mode-banner {
+    background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+    padding: 1.5rem 2.5rem;
+    border-radius: 16px;
+    margin-bottom: 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: slideDown 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: sticky;
+    top: 1rem;
+    z-index: 1000;
+}
+
+.banner-icon {
+    width: 45px;
+    height: 45px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+body.viewing-pokedex #pokemon-container .reward-card {
+    pointer-events: none !important;
+}
+
+body.viewing-pokedex .share-controls {
+    display: none !important;
+}
+/* --- Fin Estilos Compartir --- */
